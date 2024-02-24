@@ -41,16 +41,16 @@ router.get('/budgets', async (req, res, next) => {
 });
 
 // CRUD Read: Get a single budget
-router.get('/budgets/:id', async (req, res, next) => {
-  const { id } = req.params;
+router.get('/budgets/:budgetId', async (req, res, next) => {
+  const { budgetId } = req.params;
 
   try {
     //check if id is a valid value in the DB
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if (!mongoose.Types.ObjectId.isValid(budgetId)) {
       return res.status(400).json({ message: 'Id is not valid' });
     }
 
-    const budget = await Budget.findById(id);
+    const budget = await Budget.findById(budgetId);
 
     // check if there is a budget to retrieve
     if (!budget) {
@@ -64,8 +64,8 @@ router.get('/budgets/:id', async (req, res, next) => {
 });
 
 // CRUD Update: Put to update single budget using id
-router.put('/budgets/:id', async (req, res, next) => {
-  const { id } = req.params;
+router.put('/budgets/:budgetId', async (req, res, next) => {
+  const { budgetId } = req.params;
   const {
     name,
     startDate,
@@ -76,12 +76,12 @@ router.put('/budgets/:id', async (req, res, next) => {
   } = req.body;
 
   try {
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if (!mongoose.Types.ObjectId.isValid(budgetId)) {
       return res.status(400).json({ message: 'Id is not valid' });
     }
 
     const updatedBudget = await Budget.findByIdAndUpdate(
-      id,
+      budgetId,
       {
         name,
         startDate,
@@ -104,16 +104,16 @@ router.put('/budgets/:id', async (req, res, next) => {
 });
 
 // CRUD Delete: Delete single budget & related transactions
-router.delete('/budgets/:id', async (req, res, next) => {
-  const { id } = req.params;
+router.delete('/budgets/:budgetId', async (req, res, next) => {
+  const { budgetId } = req.params;
 
   try {
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if (!mongoose.Types.ObjectId.isValid(budgetId)) {
       return res.status(400).json({ message: 'Id is not valid' });
     }
 
-    await Budget.findByIdAndDelete(id);
-    await Transaction.deleteMany({ budget: id });
+    await Budget.findByIdAndDelete(budgetId);
+    await Transaction.deleteMany({ budget: budgetId });
 
     res.status(204).json({ message: 'Budget deleted successfully' });
   } catch (error) {
