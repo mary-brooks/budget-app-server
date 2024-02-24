@@ -39,4 +39,28 @@ router.get('/budgets', async (req, res, next) => {
   }
 });
 
+// CRUD Read: Get a single budget
+router.get('/budgets/:id', async (req, res, next) => {
+  const { id } = req.params;
+
+  try {
+    //check if id is a valid value in the DB
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'Id is not valid' });
+    }
+
+    const budget = await Budget.findById(id);
+
+    // check if there is a budget to retrieve
+    if (!budget) {
+      return res.status(404).json({ message: 'No budget found' });
+    }
+
+    res.status(200).json(budget);
+  } catch (error) {
+    console.log('Error retrieving budget:', error);
+    next(error);
+  }
+});
+
 module.exports = router;
