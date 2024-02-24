@@ -6,10 +6,10 @@ const budgetSchema = new Schema({
   endDate: Date,
   totalIncome: { type: Number, min: 0, default: 0 },
   savingsGoal: { type: Number, min: 0, default: 0 },
-  budgetAllocation: {
+  categoryAllocation: {
     type: [
       {
-        category: String,
+        name: String,
         amount: Number,
       },
     ],
