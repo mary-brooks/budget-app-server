@@ -2,7 +2,7 @@ const router = require('express').Router();
 const Budget = require('../models/Budget.model');
 const mongoose = require('mongoose');
 
-// CRUD Create: New budget
+// CRUD Create: Post new budget
 router.post('/budgets', async (req, res, next) => {
   const {
     name,
@@ -24,6 +24,16 @@ router.post('/budgets', async (req, res, next) => {
     });
 
     res.status(201).json(newBudget);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// CRUD Read: Get all budgets
+router.get('/budgets', async (req, res, next) => {
+  try {
+    const budgets = await Budget.find({});
+    res.status(200).json(budgets);
   } catch (error) {
     next(error);
   }
