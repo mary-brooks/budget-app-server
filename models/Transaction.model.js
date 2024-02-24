@@ -5,7 +5,7 @@ const transactionSchema = new Schema({
   vendor: { type: String, required: [true, 'Vendor is required.'] },
   category: { type: String, default: '' },
   date: { type: Date, default: Date.now },
-  budget: { type: mongoose.Schema.Types.ObjectId, ref: 'Budget' },
+  budget: { type: Schema.Types.ObjectId, ref: 'Budget' },
 });
 
 const Transaction = model('Transaction', transactionSchema);

@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const Budget = require('../models/Budget.model');
+const Transaction = require('../models/Transaction.model');
 const mongoose = require('mongoose');
 
 // CRUD Create: Post new budget
@@ -62,7 +63,7 @@ router.get('/budgets/:id', async (req, res, next) => {
   }
 });
 
-// CRUD Update: Put to update single project using id
+// CRUD Update: Put to update single budget using id
 router.put('/budgets/:id', async (req, res, next) => {
   const { id } = req.params;
   const {
@@ -98,7 +99,24 @@ router.put('/budgets/:id', async (req, res, next) => {
 
     res.status(200).json(updatedBudget);
   } catch (error) {
-    console.log('Error updating budget:', error);
+    next(error);
+  }
+});
+
+// CRUD Delete: Delete single budget & related transactions
+router.delete('/budgets/:id', async (req, res, next) => {
+  const { id } = req.params;
+
+  try {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'Id is not valid' });
+    }
+
+    await Budget.findByIdAndDelete(id);
+    await Transaction.deleteMany({ budget: id });
+
+    res.status(204).json({ message: 'Budget deleted successfully' });
+  } catch (error) {
     next(error);
   }
 });
