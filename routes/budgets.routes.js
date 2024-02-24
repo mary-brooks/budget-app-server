@@ -58,7 +58,47 @@ router.get('/budgets/:id', async (req, res, next) => {
 
     res.status(200).json(budget);
   } catch (error) {
-    console.log('Error retrieving budget:', error);
+    next(error);
+  }
+});
+
+// CRUD Update: Put to update single project using id
+router.put('/budgets/:id', async (req, res, next) => {
+  const { id } = req.params;
+  const {
+    name,
+    startDate,
+    endDate,
+    totalIncome,
+    savingsGoal,
+    categoryAllocation,
+  } = req.body;
+
+  try {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'Id is not valid' });
+    }
+
+    const updatedBudget = await Budget.findByIdAndUpdate(
+      id,
+      {
+        name,
+        startDate,
+        endDate,
+        totalIncome,
+        savingsGoal,
+        categoryAllocation,
+      },
+      { new: true }
+    );
+
+    if (!updatedBudget) {
+      return res.status(404).json({ message: 'No budget found' });
+    }
+
+    res.status(200).json(updatedBudget);
+  } catch (error) {
+    console.log('Error updating budget:', error);
     next(error);
   }
 });
