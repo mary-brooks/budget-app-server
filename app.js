@@ -21,6 +21,9 @@ app.use('/api', indexRoutes);
 const budgetsRoutes = require('./routes/budgets.routes');
 app.use('/api', budgetsRoutes);
 
+const transactionsRoutes = require('./routes/transactions.routes');
+app.use('/api', transactionsRoutes);
+
 // ❗ To handle errors. Routes that don't exist or errors that you handle in specific routes
 require('./error-handling')(app);
 
