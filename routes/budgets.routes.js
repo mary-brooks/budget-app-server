@@ -15,6 +15,7 @@ router.post('/budgets', async (req, res, next) => {
   } = req.body;
 
   try {
+    // Create a new budget
     const newBudget = await Budget.create({
       name,
       startDate,
@@ -24,8 +25,10 @@ router.post('/budgets', async (req, res, next) => {
       categoryAllocation,
     });
 
+    // Respond with the newly created budget
     res.status(201).json(newBudget);
   } catch (error) {
+    // Pass any errors to the error handler
     next(error);
   }
 });
@@ -33,37 +36,44 @@ router.post('/budgets', async (req, res, next) => {
 // CRUD Read: Get all budgets
 router.get('/budgets', async (req, res, next) => {
   try {
+    // Retrieve all budgets from the database
     const budgets = await Budget.find({});
+
+    // Respond with the list of budgets
     res.status(200).json(budgets);
   } catch (error) {
+    // Pass any errors to the error handler
     next(error);
   }
 });
 
-// CRUD Read: Get a single budget
+// CRUD Read: Get a single budget by ID
 router.get('/budgets/:budgetId', async (req, res, next) => {
   const { budgetId } = req.params;
 
   try {
-    //check if id is a valid value in the DB
+    // Check if the provided budgetId is a valid MongoDB ObjectId
     if (!mongoose.Types.ObjectId.isValid(budgetId)) {
       return res.status(400).json({ message: 'Id is not valid' });
     }
 
+    // Retrieve a single budget by ID
     const budget = await Budget.findById(budgetId);
 
-    // check if there is a budget to retrieve
+    // Check if there is a budget to retrieve
     if (!budget) {
       return res.status(404).json({ message: 'No budget found' });
     }
 
+    // Respond with the retrieved budget
     res.status(200).json(budget);
   } catch (error) {
+    // Pass any errors to the error handler
     next(error);
   }
 });
 
-// CRUD Update: Put to update single budget using id
+// CRUD Update: Put to update a single budget by ID
 router.put('/budgets/:budgetId', async (req, res, next) => {
   const { budgetId } = req.params;
   const {
@@ -76,10 +86,12 @@ router.put('/budgets/:budgetId', async (req, res, next) => {
   } = req.body;
 
   try {
+    // Check if the provided budgetId is a valid MongoDB ObjectId
     if (!mongoose.Types.ObjectId.isValid(budgetId)) {
       return res.status(400).json({ message: 'Id is not valid' });
     }
 
+    // Update a single budget by ID
     const updatedBudget = await Budget.findByIdAndUpdate(
       budgetId,
       {
@@ -93,30 +105,39 @@ router.put('/budgets/:budgetId', async (req, res, next) => {
       { new: true }
     );
 
+    // Check if the budget was found and updated
     if (!updatedBudget) {
       return res.status(404).json({ message: 'No budget found' });
     }
 
+    // Respond with the updated budget
     res.status(200).json(updatedBudget);
   } catch (error) {
+    // Pass any errors to the error handler
     next(error);
   }
 });
 
-// CRUD Delete: Delete single budget & related transactions
+// CRUD Delete: Delete a single budget by ID & related transactions
 router.delete('/budgets/:budgetId', async (req, res, next) => {
   const { budgetId } = req.params;
 
   try {
+    // Check if the provided budgetId is a valid MongoDB ObjectId
     if (!mongoose.Types.ObjectId.isValid(budgetId)) {
       return res.status(400).json({ message: 'Id is not valid' });
     }
 
+    // Delete a single budget by ID
     await Budget.findByIdAndDelete(budgetId);
+
+    // Delete all transactions related to the deleted budget
     await Transaction.deleteMany({ budget: budgetId });
 
-    res.status(204).json({ message: 'Budget deleted successfully' });
+    // Respond with a success message
+    res.status(200).json({ message: 'Budget deleted successfully' });
   } catch (error) {
+    // Pass any errors to the error handler
     next(error);
   }
 });
