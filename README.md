@@ -18,7 +18,7 @@
 | ------ | -------------------------------------------------- | ----------------------------------------------------------- |
 | GET    | /api/budgets/:budgetId/transactions                | Returns all transactions associated with a specific budget  |
 | GET    | /api/budgets/:budgetId/transactions/:transactionId | Returns the specified transaction                           |
-| POST   | /api/:budgetId/transactions                        | Creates a new transaction associated with a specific budget |
+| POST   | /api/budgets/:budgetId/transactions                | Creates a new transaction associated with a specific budget |
 | PUT    | /api/budgets/:budgetId/transactions/:transactionId | Edits the specified transaction                             |
 | DELETE | /api/budgets/:budgetId/transactions/transactionId  | Deletes the specified transaction                           |
 
