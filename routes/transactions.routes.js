@@ -14,8 +14,11 @@ router.post('/budgets/:budgetId/transactions', async (req, res, next) => {
       return res.status(400).json({ message: 'Budget id is not valid' });
     }
 
-    // Check if the corresponding budget exists in the database
-    const existingBudget = await Budget.exists({ _id: budgetId });
+    // Check if the corresponding budget exists for the authenticated user
+    const existingBudget = await Budget.exists({
+      _id: budgetId,
+      user: req.payload._id,
+    });
     if (!existingBudget) {
       return res.status(404).json({ message: 'Budget not found' });
     }
@@ -27,6 +30,7 @@ router.post('/budgets/:budgetId/transactions', async (req, res, next) => {
       category,
       date,
       budget: budgetId,
+      user: req.payload._id,
     });
 
     // Respond with the newly created transaction
@@ -37,13 +41,30 @@ router.post('/budgets/:budgetId/transactions', async (req, res, next) => {
   }
 });
 
-// CRUD Read: Get all transactions for a given budget
+// CRUD Read: Get all transactions for a given budget and user
 router.get('/budgets/:budgetId/transactions', async (req, res, next) => {
   const { budgetId } = req.params;
 
   try {
-    // Retrieve all transactions for a given budget from the database
-    const transactions = await Transaction.find({ budget: budgetId });
+    // Check if the provided budgetId is a valid MongoDB ObjectId
+    if (!mongoose.Types.ObjectId.isValid(budgetId)) {
+      return res.status(400).json({ message: 'Budget id is not valid' });
+    }
+
+    // Check if the corresponding budget exists for the authenticated user
+    const existingBudget = await Budget.exists({
+      _id: budgetId,
+      user: req.payload._id,
+    });
+    if (!existingBudget) {
+      return res.status(404).json({ message: 'Budget not found' });
+    }
+
+    // Retrieve all transactions for a given budget and user from the database
+    const transactions = await Transaction.find({
+      budget: budgetId,
+      user: req.payload._id,
+    });
 
     // Respond with the list of transactions
     res.status(200).json(transactions);
@@ -53,7 +74,7 @@ router.get('/budgets/:budgetId/transactions', async (req, res, next) => {
   }
 });
 
-// CRUD Read: Get single transaction for a given budget by ID
+// CRUD Read: Get single transaction for a given budget and user by ID
 router.get(
   '/budgets/:budgetId/transactions/:transactionId',
   async (req, res, next) => {
@@ -65,8 +86,12 @@ router.get(
         return res.status(400).json({ message: 'Transaction ID is not valid' });
       }
 
-      // Find a single transaction by ID
-      const transaction = await Transaction.findById(transactionId);
+      // Find a single transaction by ID for the authenticated user and budget
+      const transaction = await Transaction.findOne({
+        _id: transactionId,
+        budget: req.params.budgetId,
+        user: req.payload._id,
+      });
 
       // Check if the transaction exists
       if (!transaction) {
@@ -82,11 +107,11 @@ router.get(
   }
 );
 
-// CRUD Update: Put to update a single transaction for a given budget by ID
+// CRUD Update: Put to update a single transaction for a given budget and user by ID
 router.put(
   '/budgets/:budgetId/transactions/:transactionId',
   async (req, res, next) => {
-    const { transactionId } = req.params;
+    const { budgetId, transactionId } = req.params;
     const { amount, vendor, category, date } = req.body;
 
     try {
@@ -95,9 +120,13 @@ router.put(
         return res.status(400).json({ message: 'Transaction ID is not valid' });
       }
 
-      // Update a single transaction by ID
-      const updatedTransaction = await Transaction.findByIdAndUpdate(
-        transactionId,
+      // Update a single transaction by ID for the authenticated user and budget
+      const updatedTransaction = await Transaction.findOneAndUpdate(
+        {
+          _id: transactionId,
+          budget: budgetId,
+          user: req.payload._id,
+        },
         {
           amount,
           vendor,
@@ -121,11 +150,11 @@ router.put(
   }
 );
 
-// CRUD Delete: Delete single transaction for a given budget
+/// CRUD Delete: Delete single transaction for a given budget and user
 router.delete(
   '/budgets/:budgetId/transactions/:transactionId',
   async (req, res, next) => {
-    const { transactionId } = req.params;
+    const { budgetId, transactionId } = req.params;
 
     try {
       // Check if the provided transactionId is a valid MongoDB ObjectId
@@ -133,8 +162,17 @@ router.delete(
         return res.status(400).json({ message: 'Transaction ID is not valid' });
       }
 
-      // Delete single transaction by ID
-      await Transaction.findByIdAndDelete(transactionId);
+      // Delete single transaction by ID for the authenticated user and budget
+      const deletedTransaction = await Transaction.findOneAndDelete({
+        _id: transactionId,
+        budget: budgetId,
+        user: req.payload._id,
+      });
+
+      // Check if the transaction exists
+      if (!deletedTransaction) {
+        return res.status(404).json({ message: 'Transaction not found' });
+      }
 
       // Respond with a success message
       res.status(200).json({ message: 'Transaction deleted successfully' });
