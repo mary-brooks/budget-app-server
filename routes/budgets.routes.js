@@ -15,7 +15,7 @@ router.post('/budgets', async (req, res, next) => {
   } = req.body;
 
   try {
-    // Create a new budget
+    // Create a new budget associated with the authenticated user
     const newBudget = await Budget.create({
       name,
       startDate,
@@ -23,6 +23,7 @@ router.post('/budgets', async (req, res, next) => {
       totalIncome,
       savingsGoal,
       categoryAllocation,
+      user: req.payload._id, // Assuming user ID is available in req.payload after authentication
     });
 
     // Respond with the newly created budget
@@ -33,11 +34,11 @@ router.post('/budgets', async (req, res, next) => {
   }
 });
 
-// CRUD Read: Get all budgets
+// CRUD Read: Get all budgets for the authenticated user
 router.get('/budgets', async (req, res, next) => {
   try {
-    // Retrieve all budgets from the database
-    const budgets = await Budget.find({});
+    // Retrieve budgets associated with the authenticated user from the database
+    const budgets = await Budget.find({ user: req.payload._id });
 
     // Respond with the list of budgets
     res.status(200).json(budgets);
@@ -47,7 +48,7 @@ router.get('/budgets', async (req, res, next) => {
   }
 });
 
-// CRUD Read: Get a single budget by ID
+// CRUD Read: Get a single budget by ID for the authenticated user
 router.get('/budgets/:budgetId', async (req, res, next) => {
   const { budgetId } = req.params;
 
@@ -57,8 +58,11 @@ router.get('/budgets/:budgetId', async (req, res, next) => {
       return res.status(400).json({ message: 'Id is not valid' });
     }
 
-    // Retrieve a single budget by ID
-    const budget = await Budget.findById(budgetId);
+    // Retrieve a single budget by ID for the authenticated user
+    const budget = await Budget.findOne({
+      _id: budgetId,
+      user: req.payload._id,
+    });
 
     // Check if there is a budget to retrieve
     if (!budget) {
@@ -73,7 +77,7 @@ router.get('/budgets/:budgetId', async (req, res, next) => {
   }
 });
 
-// CRUD Update: Put to update a single budget by ID
+// CRUD Update: Put to update a single budget by ID for the authenticated user
 router.put('/budgets/:budgetId', async (req, res, next) => {
   const { budgetId } = req.params;
   const {
@@ -91,9 +95,9 @@ router.put('/budgets/:budgetId', async (req, res, next) => {
       return res.status(400).json({ message: 'Id is not valid' });
     }
 
-    // Update a single budget by ID
-    const updatedBudget = await Budget.findByIdAndUpdate(
-      budgetId,
+    // Update a single budget by ID for the authenticated user
+    const updatedBudget = await Budget.findOneAndUpdate(
+      { _id: budgetId, user: req.payload._id },
       {
         name,
         startDate,
@@ -118,7 +122,7 @@ router.put('/budgets/:budgetId', async (req, res, next) => {
   }
 });
 
-// CRUD Delete: Delete a single budget by ID & related transactions
+// CRUD Delete: Delete a single budget by ID & related transactions for the authenticated user
 router.delete('/budgets/:budgetId', async (req, res, next) => {
   const { budgetId } = req.params;
 
@@ -128,8 +132,16 @@ router.delete('/budgets/:budgetId', async (req, res, next) => {
       return res.status(400).json({ message: 'Id is not valid' });
     }
 
-    // Delete a single budget by ID
-    await Budget.findByIdAndDelete(budgetId);
+    // Delete a single budget by ID for the authenticated user
+    const deletedBudget = await Budget.findOneAndDelete({
+      _id: budgetId,
+      user: req.payload._id,
+    });
+
+    // Check if the budget was found and deleted
+    if (!deletedBudget) {
+      return res.status(404).json({ message: 'No budget found' });
+    }
 
     // Delete all transactions related to the deleted budget
     await Transaction.deleteMany({ budget: budgetId });

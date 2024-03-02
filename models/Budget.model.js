@@ -15,6 +15,7 @@ const budgetSchema = new Schema({
     ],
     default: [],
   },
+  user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
 });
 
 const Budget = model('Budget', budgetSchema);
