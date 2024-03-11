@@ -41,9 +41,10 @@ router.post('/budgets/:budgetId/transactions', async (req, res, next) => {
   }
 });
 
-// CRUD Read: Get all transactions for a given budget and user
+// CRUD Read: Get transactions for a given budget and user
 router.get('/budgets/:budgetId/transactions', async (req, res, next) => {
   const { budgetId } = req.params;
+  const { limit } = req.query;
 
   try {
     // Check if the provided budgetId is a valid MongoDB ObjectId
@@ -60,11 +61,24 @@ router.get('/budgets/:budgetId/transactions', async (req, res, next) => {
       return res.status(404).json({ message: 'Budget not found' });
     }
 
-    // Retrieve all transactions for a given budget and user from the database
-    const transactions = await Transaction.find({
-      budget: budgetId,
-      user: req.payload._id,
-    });
+    // Retrieve transactions for a given budget and user from the database
+    let transactions;
+
+    if (limit) {
+      // If limit is specified, retrieve the specified number of recent transactions
+      transactions = await Transaction.find({
+        budget: budgetId,
+        user: req.payload._id,
+      })
+        .sort({ date: -1 }) // Sort by date in descending order
+        .limit(parseInt(limit, 10)); // Convert limit to an integer
+    } else {
+      // Otherwise, retrieve all transactions
+      transactions = await Transaction.find({
+        budget: budgetId,
+        user: req.payload._id,
+      });
+    }
 
     // Respond with the list of transactions
     res.status(200).json(transactions);
