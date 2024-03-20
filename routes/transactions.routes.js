@@ -6,7 +6,8 @@ const mongoose = require('mongoose');
 // CRUD Create: Post new transaction for a given budget
 router.post('/budgets/:budgetId/transactions', async (req, res, next) => {
   const { budgetId } = req.params;
-  const { amount, vendor, category, date } = req.body;
+  const { amount, convertedAmount, currency, vendor, category, date } =
+    req.body;
 
   try {
     // Check if the provided budgetId is a valid MongoDB ObjectId
@@ -26,6 +27,8 @@ router.post('/budgets/:budgetId/transactions', async (req, res, next) => {
     // Create a new transaction for a given budget
     const newTransaction = await Transaction.create({
       amount,
+      convertedAmount,
+      currency,
       vendor,
       category,
       date,
@@ -126,7 +129,8 @@ router.put(
   '/budgets/:budgetId/transactions/:transactionId',
   async (req, res, next) => {
     const { budgetId, transactionId } = req.params;
-    const { amount, vendor, category, date } = req.body;
+    const { amount, convertedAmount, currency, vendor, category, date } =
+      req.body;
 
     try {
       // Check if the provided transactionId is a valid MongoDB ObjectId
@@ -143,6 +147,8 @@ router.put(
         },
         {
           amount,
+          convertedAmount,
+          currency,
           vendor,
           category,
           date,
