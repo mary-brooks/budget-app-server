@@ -2,7 +2,12 @@ const { Schema, model } = require('mongoose');
 
 const transactionSchema = new Schema({
   amount: { type: Number, default: 0 },
-  convertedAmount: { type: Number, default: 0 },
+  convertedAmount: {
+    type: Number,
+    default: function () {
+      return this.amount;
+    },
+  },
   currency: { type: String, default: 'EUR' },
   vendor: { type: String, required: [true, 'Vendor is required.'] },
   category: { type: String, default: '' },
