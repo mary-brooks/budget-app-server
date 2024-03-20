@@ -2,6 +2,8 @@ const { Schema, model } = require('mongoose');
 
 const transactionSchema = new Schema({
   amount: { type: Number, default: 0 },
+  convertedAmount: { type: Number, default: 0 },
+  currency: { type: String, default: 'EUR' },
   vendor: { type: String, required: [true, 'Vendor is required.'] },
   category: { type: String, default: '' },
   date: { type: Date, default: Date.now },
