@@ -1,4 +1,4 @@
-# Budget App Server
+# Budget Buddy Server
 
 ## Routes
 
